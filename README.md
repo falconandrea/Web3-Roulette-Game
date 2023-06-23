@@ -1,30 +1,29 @@
-# Hardhat + Next Boilerplate
+# Roulette game on-chain
 
-I created this simple Boilerplate with Hardhat + NextJS for doing my exercises and tutorials.
+LearnWeb3 Bounty: QRNG Roulette Wheel Bounty Challenge
 
-Features:
+## API3 Quantum Roulette Bounty Challenge
 
-- Example Mint NFT contract + test
-- Empty frontend with default functions (wallet connect, get providers or signers, check network)
-- Hardhat and NextJS ready to code
+### The Challenge:
 
-TODO:
+Your mission, should you choose to accept it, is to follow a step-by-step tutorial to code a Solidity-based roulette game that uses API3's Quantum Random Number Generator (QRNG) to ensure true randomness. You will be using Remix IDE to code and deploy your contract.
 
-- Create simple graphic template
+### Project Features:
 
-```shell
-# Install packages
-npm install
+Your roulette game should support the following betting options:
 
-# Compile contracts
-npx hardhat compile
+1. Users can bet on either the first, second or third dozen of the numbers on the board.
 
-# Launch tests
-npx hardhat test
+2. Users can bet on either the first or second half of the numbers on the board.
 
-# Run script deploy
-npx hardhat run scripts/deploy.js --network goerli
+3. Users can bet on either the set of all even or odd numbers on the board.
 
-# Use frontend in local
-npm run dev
-```
+4. Users can bet on all red or black numbers on the board.
+
+5. Users can choose any one specific number on the board.
+
+The winning condition is met if the QRNG-generated number lands on a user's selected number(s).
+
+### Tutorial to follow step-by-step:
+
+Check out our comprehensive guide - [Tutorial](https://docs.api3.org/guides/qrng/roulette-guide/)
