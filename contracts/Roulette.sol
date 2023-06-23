@@ -373,19 +373,50 @@ contract Roulette is RrpRequesterV0 {
   // to refill the "house" (address(this)) if bankrupt
   receive() external payable {}
 
-  /// @notice for user to submit a single-number bet, which pays out 35:1 if correct after spin
-  /// @param _numberBet number between 0 and 36
-  /// @return userToSpinCount[msg.sender] spin count for this msg.sender, to enter in spinRouletteWheel()
-  function betNumber(uint256 _numberBet) external payable returns (uint256) {
-    require(_numberBet < 37, "_numberBet is > 36");
+  /// @dev Reverts if msg.value < MIN_BET or House balance is too low
+  /// @param _value uint moltiplicator for check the win
+  // After checks, increments spinCount and save msg.value, spinCount and msg.sender
+  modifier checkBetConditions(uint _value) {
     require(msg.value >= MIN_BET, "msg.value < MIN_BET");
-    if (address(this).balance < msg.value * 35) revert HouseBalanceTooLow();
-    userToCurrentBet[msg.sender] = msg.value;
+    if (address(this).balance < msg.value * _value) revert HouseBalanceTooLow();
     unchecked {
       ++spinCount;
     }
+    userToCurrentBet[msg.sender] = msg.value;
     userToSpinCount[msg.sender] = spinCount;
     spinToUser[spinCount] = msg.sender;
+    _;
+  }
+
+  /// @notice for internal usage, to send unsuccessful bet to sponsor wallet and deployer
+  /// @param _user user address
+  function sendUnsuccessfullBet(address _user) internal {
+      (bool sent, ) = sponsorWallet.call{ value: userToCurrentBet[_user] / 10 }("");
+      if (!sent) revert TransferToSponsorWalletFailed();
+      (bool sent2, ) = deployer.call{ value: userToCurrentBet[_user] / 50 }("");
+      if (!sent2) revert TransferToDeployerWalletFailed();
+  }
+
+  /// @notice for internal usage, to send successful bet to the player
+  /// @param _user user address
+  /// @param _value moltiplicator for the win
+  function sendSuccessfullBet(address _user, uint _value) internal {
+    (bool sent, ) = _user.call{ value: userToCurrentBet[_user] * _value }("");
+    if (!sent) revert HouseBalanceTooLow();
+  }
+
+  /// @notice for internal usage, to send back bet to the player
+  /// @param _user user address
+  function returnBet(address _user) internal {
+    (bool sent, ) = _user.call{ value: userToCurrentBet[_user] }("");
+    if (!sent) revert ReturnFailed();
+  }
+
+  /// @notice for user to submit a single-number bet, which pays out 35:1 if correct after spin
+  /// @param _numberBet number between 0 and 36
+  /// @return userToSpinCount[msg.sender] spin count for this msg.sender, to enter in spinRouletteWheel()
+  function betNumber(uint256 _numberBet) checkBetConditions(35) external payable returns (uint256) {
+    require(_numberBet < 37, "_numberBet is > 36");
     userToNumber[msg.sender] = _numberBet;
     userBetANumber[msg.sender] = true;
     spinToBetType[spinCount] = BetType.Number;
@@ -401,20 +432,15 @@ contract Roulette is RrpRequesterV0 {
     if (!userBetANumber[_user]) revert NoBet();
     if (!spinIsComplete[_spin]) revert SpinNotComplete();
     if (spinResult[_spin] == 37) {
-      (bool sent, ) = _user.call{ value: userToCurrentBet[_user] }("");
-      if (!sent) revert ReturnFailed();
+      returnBet(_user);
     } else {}
     if (userToNumber[_user] == spinResult[_spin] % 37) {
-      (bool sent, ) = _user.call{ value: userToCurrentBet[_user] * 35 }("");
-      if (!sent) revert HouseBalanceTooLow();
+      sendSuccessfullBet(_user, 35);
     } else {
-      (bool sent, ) = sponsorWallet.call{ value: userToCurrentBet[_user] / 10 }("");
-      if (!sent) revert TransferToSponsorWalletFailed();
-      (bool sent2, ) = deployer.call{ value: userToCurrentBet[_user] / 50 }("");
-      if (!sent2) revert TransferToDeployerWalletFailed();
+      sendUnsuccessfullBet(_user);
     }
-    userToCurrentBet[_user] = 0;
     userBetANumber[_user] = false;
+    userToCurrentBet[_user] = 0;
     emit WinningNumber(_spin, spinResult[_spin] % 37);
     return (spinResult[_spin] % 37);
   }
@@ -422,16 +448,8 @@ contract Roulette is RrpRequesterV0 {
   /// @notice submit bet and "1", "2", or "3" for a bet on 1st/2nd/3rd of table, which pays out 3:1 if correct after spin
   /// @param _oneThirdBet uint 1, 2, or 3 to represent first, second or third of table
   /// @return userToSpinCount[msg.sender] spin count for this msg.sender, to enter in spinRouletteWheel()
-  function betOneThird(uint256 _oneThirdBet) external payable returns (uint256) {
+  function betOneThird(uint256 _oneThirdBet) checkBetConditions(3) external payable returns (uint256) {
     require(_oneThirdBet == 1 || _oneThirdBet == 2 || _oneThirdBet == 3, "_oneThirdBet not 1 or 2 or 3");
-    require(msg.value >= MIN_BET, "msg.value < MIN_BET");
-    if (address(this).balance < msg.value * 3) revert HouseBalanceTooLow();
-    userToCurrentBet[msg.sender] = msg.value;
-    unchecked {
-      ++spinCount;
-    }
-    spinToUser[spinCount] = msg.sender;
-    userToSpinCount[msg.sender] = spinCount;
     userToThird[msg.sender] = _oneThirdBet;
     userBetThird[msg.sender] = true;
     spinToBetType[spinCount] = BetType.Third;
@@ -456,26 +474,19 @@ contract Roulette is RrpRequesterV0 {
       _thirdResult = 3;
     }
     if (spinResult[_spin] == 37) {
-      (bool sent, ) = _user.call{ value: userToCurrentBet[_user] }("");
-      if (!sent) revert ReturnFailed();
+      returnBet(_user);
     } else {}
-    if (userToThird[_user] == 1 && _thirdResult == 1) {
-      (bool sent, ) = _user.call{ value: userToCurrentBet[_user] * 3 }("");
-      if (!sent) revert HouseBalanceTooLow();
-    } else if (userToThird[_user] == 2 && _thirdResult == 2) {
-      (bool sent, ) = _user.call{ value: userToCurrentBet[_user] * 3 }("");
-      if (!sent) revert HouseBalanceTooLow();
-    } else if (userToThird[_user] == 3 && _thirdResult == 3) {
-      (bool sent, ) = _user.call{ value: userToCurrentBet[_user] * 3 }("");
-      if (!sent) revert HouseBalanceTooLow();
+    if (
+      (userToThird[_user] == 1 && _thirdResult == 1) ||
+      (userToThird[_user] == 2 && _thirdResult == 2) ||
+      (userToThird[_user] == 3 && _thirdResult == 3)
+    ) {
+      sendSuccessfullBet(_user, 3);
     } else {
-      (bool sent, ) = sponsorWallet.call{ value: userToCurrentBet[_user] / 10 }("");
-      if (!sent) revert TransferToSponsorWalletFailed();
-      (bool sent2, ) = deployer.call{ value: userToCurrentBet[_user] / 50 }("");
-      if (!sent2) revert TransferToDeployerWalletFailed();
+      sendUnsuccessfullBet(_user);
     }
-    userToCurrentBet[_user] = 0;
     userBetThird[_user] = false;
+    userToCurrentBet[_user] = 0;
     emit WinningNumber(_spin, spinResult[_spin] % 37);
     return (spinResult[_spin] % 37);
   }
@@ -484,16 +495,8 @@ contract Roulette is RrpRequesterV0 {
     /// @notice submit bet and "1" or "2" for a bet on 1st/2nd/3rd of table, which pays out 2:1 if correct after spin
   /// @param _halfBet uint 1 or 2 to represent first or second half of table
   /// @return userToSpinCount[msg.sender] spin count for this msg.sender, to enter in spinRouletteWheel()
-  function betHalf(uint256 _halfBet) external payable returns (uint256) {
+  function betHalf(uint256 _halfBet) checkBetConditions(2) external payable returns (uint256) {
 	 require(_halfBet == 1 || _halfBet == 2, "_halfBet not 1 or 2");
-	 require(msg.value >= MIN_BET, "msg.value < MIN_BET");
-	 if (address(this).balance < msg.value * 2) revert HouseBalanceTooLow();
-	 userToCurrentBet[msg.sender] = msg.value;
-	 unchecked {
-		++spinCount;
-	 }
-	 spinToUser[spinCount] = msg.sender;
-	 userToSpinCount[msg.sender] = spinCount;
 	 userToHalf[msg.sender] = _halfBet;
 	 userBetHalf[msg.sender] = true;
 	 spinToBetType[spinCount] = BetType.Half;
@@ -516,25 +519,20 @@ contract Roulette is RrpRequesterV0 {
 		_halfResult = 2;
 	 }
 	 if (spinResult[_spin] == 37) {
-		(bool sent, ) = _user.call{ value: userToCurrentBet[_user] }("");
-		if (!sent) revert ReturnFailed();
+		returnBet(_user);
 	 } else {}
-	 if (userToHalf[_user] == 1 && _halfResult == 1) {
-		(bool sent, ) = _user.call{ value: userToCurrentBet[_user] * 2 }("");
-		if (!sent) revert HouseBalanceTooLow();
-	 } else if (userToHalf[_user] == 2 && _halfResult == 2) {
-		(bool sent, ) = _user.call{ value: userToCurrentBet[_user] * 2 }("");
-		if (!sent) revert HouseBalanceTooLow();
+	 if (
+    (userToHalf[_user] == 1 && _halfResult == 1) ||
+    (userToHalf[_user] == 2 && _halfResult == 2)
+   ) {
+		sendSuccessfullBet(_user, 2);
 	 } else {
-		(bool sent, ) = sponsorWallet.call{ value: userToCurrentBet[_user] / 10 }("");
-		if (!sent) revert TransferToSponsorWalletFailed();
-		(bool sent2, ) = deployer.call{ value: userToCurrentBet[_user] / 50 }("");
-		if (!sent2) revert TransferToDeployerWalletFailed();
+    sendUnsuccessfullBet(_user);
 	 }
-	 userToCurrentBet[_user] = 0;
 	 userBetHalf[_user] = false;
-	 emit WinningNumber(_spin, spinResult[_spin] % 37);
-	 return (spinResult[_spin] % 37);
+   userToCurrentBet[_user] = 0;
+   emit WinningNumber(_spin, spinResult[_spin] % 37);
+   return (spinResult[_spin] % 37);
   }
 
 
@@ -544,15 +542,7 @@ contract Roulette is RrpRequesterV0 {
    *** reminder that a return of 0 is neither even nor odd in roulette **/
   /// @param _isEven boolean bet, true for even
   /// @return userToSpinCount[msg.sender] spin count for this msg.sender, to enter in spinRouletteWheel()
-  function betEvenOdd(bool _isEven) external payable returns (uint256) {
-    require(msg.value >= MIN_BET, "msg.value < MIN_BET");
-    if (address(this).balance < msg.value * 2) revert HouseBalanceTooLow();
-    unchecked {
-      ++spinCount;
-    }
-    spinToUser[spinCount] = msg.sender;
-    userToCurrentBet[msg.sender] = msg.value;
-    userToSpinCount[msg.sender] = spinCount;
+  function betEvenOdd(bool _isEven) checkBetConditions(2) external payable returns (uint256) {
     userBetEvenOdd[msg.sender] = true;
     if (_isEven) {
       userToEven[msg.sender] = true;
@@ -571,23 +561,18 @@ contract Roulette is RrpRequesterV0 {
     if (!spinIsComplete[_spin]) revert SpinNotComplete();
     uint256 _result = spinResult[_spin] % 37;
     if (spinResult[_spin] == 37) {
-      (bool sent, ) = _user.call{ value: userToCurrentBet[_user] }("");
-      if (!sent) revert ReturnFailed();
+      returnBet(_user);
     } else {}
     if (_result == 0) {
       (bool sent, ) = sponsorWallet.call{ value: userToCurrentBet[_user] / 10 }("");
       if (!sent) revert TransferToSponsorWalletFailed();
-    } else if (userToEven[_user] && (_result % 2 == 0)) {
-      (bool sent, ) = _user.call{ value: userToCurrentBet[_user] * 2 }("");
-      if (!sent) revert HouseBalanceTooLow();
-    } else if (!userToEven[_user] && _result % 2 != 0) {
-      (bool sent, ) = _user.call{ value: userToCurrentBet[_user] * 2 }("");
-      if (!sent) revert HouseBalanceTooLow();
+    } else if (
+      (userToEven[_user] && (_result % 2 == 0)) ||
+      (!userToEven[_user] && _result % 2 != 0)
+    ) {
+      sendSuccessfullBet(_user, 2);
     } else {
-      (bool sent, ) = sponsorWallet.call{ value: userToCurrentBet[_user] / 10 }("");
-      if (!sent) revert TransferToSponsorWalletFailed();
-      (bool sent2, ) = deployer.call{ value: userToCurrentBet[_user] / 50 }("");
-      if (!sent2) revert TransferToDeployerWalletFailed();
+      sendUnsuccessfullBet(_user);
     }
     userBetEvenOdd[_user] = false;
     userToCurrentBet[_user] = 0;
@@ -599,15 +584,7 @@ contract Roulette is RrpRequesterV0 {
    *** reminder that 0 is neither red nor black in roulette **/
   /// @param _isBlack boolean bet, true for black, false for red
   /// @return userToSpinCount[msg.sender] spin count for this msg.sender, to enter in spinRouletteWheel()
-  function betColor(bool _isBlack) external payable returns (uint256) {
-    require(msg.value >= MIN_BET, "msg.value < MIN_BET");
-    if (address(this).balance < msg.value * 2) revert HouseBalanceTooLow();
-    unchecked {
-      ++spinCount;
-    }
-    spinToUser[spinCount] = msg.sender;
-    userToCurrentBet[msg.sender] = msg.value;
-    userToSpinCount[msg.sender] = spinCount;
+  function betColor(bool _isBlack) checkBetConditions(2) external payable returns (uint256) {
     userBetAColor[msg.sender] = true;
     if (_isBlack) {
       userToColor[msg.sender] = true;
@@ -626,28 +603,20 @@ contract Roulette is RrpRequesterV0 {
     if (!spinIsComplete[_spin]) revert SpinNotComplete();
     uint256 _result = spinResult[_spin] % 37;
     if (spinResult[_spin] == 37) {
-      (bool sent, ) = _user.call{ value: userToCurrentBet[_user] }("");
-      if (!sent) revert ReturnFailed();
+      returnBet(_user);
     } else if (_result == 0) {
-      (bool sent, ) = sponsorWallet.call{ value: userToCurrentBet[_user] / 10 }("");
-      if (!sent) revert TransferToSponsorWalletFailed();
-      (bool sent2, ) = deployer.call{ value: userToCurrentBet[_user] / 50 }("");
-      if (!sent2) revert TransferToDeployerWalletFailed();
+      sendUnsuccessfullBet(_user);
     } else {
       if (blackNumber[_result]) {
         blackSpin[_spin] = true;
       } else {}
-      if (userToColor[_user] && blackSpin[_spin]) {
-        (bool sent, ) = _user.call{ value: userToCurrentBet[_user] * 2 }("");
-        if (!sent) revert HouseBalanceTooLow();
-      } else if (!userToColor[_user] && !blackSpin[_spin] && _result != 0) {
-        (bool sent, ) = _user.call{ value: userToCurrentBet[_user] * 2 }("");
-        if (!sent) revert HouseBalanceTooLow();
+      if (
+        (userToColor[_user] && blackSpin[_spin]) ||
+        (!userToColor[_user] && !blackSpin[_spin] && _result != 0)
+      ) {
+        sendSuccessfullBet(_user, 2);
       } else {
-        (bool sent, ) = sponsorWallet.call{ value: userToCurrentBet[_user] / 10 }("");
-        if (!sent) revert TransferToSponsorWalletFailed();
-        (bool sent2, ) = deployer.call{ value: userToCurrentBet[_user] / 50 }("");
-        if (!sent2) revert TransferToDeployerWalletFailed();
+        sendUnsuccessfullBet(_user);
       }
     }
     userBetAColor[_user] = false;
