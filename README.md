@@ -27,3 +27,28 @@ The winning condition is met if the QRNG-generated number lands on a user's sele
 ### Tutorial to follow step-by-step:
 
 Check out our comprehensive guide - [Tutorial](https://docs.api3.org/guides/qrng/roulette-guide/)
+
+## Instructions
+
+The code works on Mumbai network. If you want to change network, update the file `hardhat.config.js` and `.env` file.
+
+```batch
+# Install packages
+npm install
+
+# Copy .env file
+cp .env.example .env
+
+# Compile .env file with PRIVATE_KEY, URL_PROVIDER, CHAIN_ID, IS_TESTNET
+
+# Deploy contract
+npx hardhat run scripts/deploy.js --network mumbai
+
+# Get the Roulette contract and insert it inside .env file
+
+# Setup contract
+npx hardhat run scripts/setup.js
+
+# Get the sponsor wallet address and send some money on the contract
+
+```
