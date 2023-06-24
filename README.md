@@ -49,6 +49,7 @@ npx hardhat run scripts/deploy.js --network mumbai
 # Setup contract
 npx hardhat run scripts/setup.js
 
-# Get the sponsor wallet address and send some money on the contract
+# Get the sponsor wallet address and send some MATIC on the contract
+# You can send MATIC to the contract directly or with the topUpSponsorWallet function inside the contract deployed
 
 ```
