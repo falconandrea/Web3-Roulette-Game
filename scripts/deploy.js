@@ -5,14 +5,20 @@
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
 const hre = require("hardhat");
+const airnodeProtocol = require('@api3/airnode-protocol');
 
 async function main() {
-  const simpleNFT = await hre.ethers.deployContract("SimpleNFT");
+  // We are getting the AirnodeRrp address from @api3/airnode-protocol
+  // Alternatively, you can get it from the docs
+  // https://docs.api3.org/airnode/latest/reference/airnode-addresses.html
+  const airnodeRrpAddress = airnodeProtocol.AirnodeRrpAddresses[process.env.CHAIN_ID];
 
-  await simpleNFT.waitForDeployment();
+  const roulette = await hre.ethers.deployContract("Roulette", [airnodeRrpAddress]);
+
+  await roulette.waitForDeployment();
 
   console.log(
-    `SimpleNFT deployed to ${simpleNFT.target}`
+    `Roulette deployed to ${roulette.target}`
   );
 }
 
