@@ -100,6 +100,8 @@ export default function Home() {
     }
   }
 
+  const [selected, setSelected] = useState('')
+
   return (
     <div>
       <Head>
@@ -114,9 +116,9 @@ export default function Home() {
           </div>
         ) : ''}
         <div className={styles.containerTableBet}>
-          <Table />
+          <Table selected={selected} setSelected={setSelected} />
+          <Wheel selected={selected} setSelected={setSelected} />
         </div>
-          <Wheel />
         {renderMessages()}
       </div>
 

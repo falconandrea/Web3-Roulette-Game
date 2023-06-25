@@ -1,6 +1,7 @@
 .rouletteTable {
   width: 740px;
-  float: right;
+  scale: 90%;
+  float: left;
 }
 
 .containerTable {

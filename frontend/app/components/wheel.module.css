@@ -1,5 +1,41 @@
-.wheel {
-  width: 400px;
-  float: left;
+.containerWheel {
   padding-top: 2rem;
+  float: right;
+}
+
+.containerWheelImage {
+  overflow: hidden;
+  position: relative;
+  width: 350px;
+}
+.wheelImage {
+  float: left;
+  width: 100%;
+}
+.wheelResult {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -20px;
+  margin-left: -20px;
+  color: white;
+  font-size: 1.8rem;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  line-height: 40px;
+  border-radius: 100%;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  -ms-border-radius: 100%;
+  -o-border-radius: 100%;
+}
+.wheelResult.black {
+  background-color: black;
+}
+.wheelResult.zero {
+  background: green;
+}
+.wheelResult.red {
+  background-color: red;
 }
