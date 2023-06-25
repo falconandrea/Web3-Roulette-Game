@@ -1,0 +1,134 @@
+.rouletteTable {
+  width: 740px;
+  float: right;
+}
+
+.containerTable {
+  display: flex;
+  flex-flow: column-reverse wrap;
+  align-content: flex-start;
+  width: auto;
+  height: 300px;
+  padding: 0px 0px 0px 20px;
+  background-color: green;
+  border-top: 2px sold white;
+}
+
+.redItem,
+.blackItem,
+.zeroItem {
+  box-sizing: border-box;
+  border: none;
+  border-left: 3px solid white;
+  border-top: 3px solid white;
+  padding-top: 25px;
+  padding-bottom: 25px;
+  text-align: center;
+  width: 50px;
+  font-size: 30px;
+  color: white;
+  cursor: pointer;
+}
+.zeroItem {
+  background-color: green;
+  border-bottom: 3px solid white;
+  padding-top: 111px;
+  padding-bottom: 111px;
+}
+.redItem {
+  background-color: red;
+}
+
+.blackItem {
+  background-color: black;
+}
+
+.lastRow {
+  border-right: 3px solid white;
+}
+
+.containerSecond {
+  display: flex;
+  background-color: green;
+  width: auto;
+  height: 68px;
+  flex-flow: row wrap;
+  align-content: flex-start;
+  padding: 0px 0px 0px 72px;
+}
+
+.dozItem {
+  flex-basis: 199px;
+  border: 3px solid white;
+  background-color: green;
+  padding-top: 15px;
+  padding-bottom: 30px;
+  text-align: center;
+  height: 20px;
+  font-size: 30px;
+  color: white;
+  margin-top: -3px;
+  margin-left: -2px;
+  border-right: none;
+  border-bottom: 3px solid white;
+  cursor: pointer;
+}
+.dozItem:last-child {
+  border-right: 3px solid white;
+  flex-basis: 194px;
+}
+
+.containerThird {
+  display: flex;
+  background-color: green;
+  width: auto;
+  height: 100px;
+  flex-flow: row wrap;
+  align-content: flex-start;
+  padding: 0px 0px 0px 72px;
+}
+
+.outsideSection {
+  flex-basis: 99px;
+  border: 3px solid white;
+  background-color: green;
+  padding-top: 15px;
+  padding-bottom: 30px;
+  text-align: center;
+  height: 20px;
+  font-size: 30px;
+  color: white;
+  margin-top: -3px;
+  margin-left: -2px;
+  border-right: none;
+  border-bottom: 3px solid white;
+  cursor: pointer;
+}
+.outsideSection:last-child {
+  border-right: 3px solid white;
+  flex-basis: 94px;
+}
+
+.rhombRed {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  background-color: red;
+  border: solid white;
+  transform: rotate(45deg);
+  text-indent: -999rem;
+}
+
+.rhombBlack {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  background-color: black;
+  border: solid white;
+  transform: rotate(45deg);
+  text-indent: -999rem;
+}
+
+.value {
+  transform: rotate(-90deg);
+}

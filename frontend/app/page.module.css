@@ -2,6 +2,11 @@
   text-align: center;
 }
 
+.containerTableBet {
+  overflow: hidden;
+  margin: 0 auto;
+}
+
 .errorMessage {
   color: red;
   margin: 20px 0 20px 0;
@@ -25,4 +30,14 @@
   color: white;
   text-align: center;
   margin-top: 30%;
+}
+
+.footer {
+  color: white;
+  text-align: center;
+  font-size: 1.4rem;
+}
+.footer a {
+  color: white;
+  text-decoration: underline;
 }

@@ -6,8 +6,11 @@ import React, { useEffect, useRef, useState } from "react";
 import Web3Modal from "web3modal";
 import styles from './page.module.css'
 
-const NFT_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS
-import contract from "artifactsContracts/SimpleNFT.sol/SimpleNFT"
+import Table from './components/table'
+import Wheel from './components/wheel'
+
+const ROULETTE_ADDRESS = process.env.NEXT_PUBLIC_ROULETTE_ADDRESS
+import contract from "artifactsContracts/Roulette.sol/Roulette"
 const abi = contract.abi
 const NETWORK_NAME = process.env.NEXT_PUBLIC_NETWORK_NAME
 const NETWORK_ID = process.env.NEXT_PUBLIC_NETWORK_ID
@@ -80,53 +83,6 @@ export default function Home() {
     }
   }, [walletConnected]);
 
-  /**
-   * publicMint: Mint an NFT after the presale
-   */
-  const publicMint = async () => {
-    try {
-      // Reset messages
-      setErrorMessage('')
-      setSuccessMessage('')
-      // We need a Signer here since this is a 'write' transaction.
-      const signer = await getProviderOrSigner(true)
-      // Create a new instance of the Contract with a Signer, which allows
-      // update methods
-      const nftContract = new Contract(NFT_CONTRACT_ADDRESS, abi, signer)
-      // call the mint from the contract to mint the NFT
-      const tx = await nftContract.mint({
-        // value signifies the cost of one NFT which is "0.01" eth.
-        // We are parsing `0.01` string to ether using the utils library from ethers.js
-        value: utils.parseEther('0.01')
-      })
-      setLoading(true)
-      // wait for the transaction to get mined
-      await tx.wait()
-      setLoading(false)
-      setSuccessMessage('You successfully minted your NFT!')
-    } catch (err) {
-      console.error(err)
-      setErrorMessage('Error during public mint')
-    }
-  }
-
-  const renderButton = () => {
-    // If wallet is not connected, return a button which allows them to connect their wallet
-    if (!walletConnected) {
-      return (
-        <button onClick={connectWallet} className={styles.button}>
-          Connect your wallet
-        </button>
-      );
-    }
-
-    return (
-      <button className={styles.button} onClick={publicMint}>
-        Public Mint 🚀
-      </button>
-    );
-  };
-
   const renderMessages = () => {
     if(successMessage) {
       return (
@@ -147,21 +103,24 @@ export default function Home() {
   return (
     <div>
       <Head>
-        <title>Example</title>
-        <meta name="description" content="Example app" />
+        <title>Roulette game</title>
+        <meta name="description" content="Roulette game app" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div>
+      <div className={styles.main}>
         { loading ? (
           <div className={styles.loading}>
             <p>Loading...</p>
           </div>
         ) : ''}
-        {renderButton()}
+        <div className={styles.containerTableBet}>
+          <Table />
+        </div>
+          <Wheel />
         {renderMessages()}
       </div>
 
-      <footer className={styles.footer}>Created by Falcon Andrea</footer>
+      <footer className={styles.footer}>Created by <a href="https://linktr.ee/falconandrea" target="_blank" title="">Falcon Andrea</a></footer>
     </div>
   )
 }
