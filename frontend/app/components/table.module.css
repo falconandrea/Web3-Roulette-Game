@@ -1,6 +1,6 @@
 .rouletteTable {
-  width: 740px;
-  scale: 90%;
+  width: 675px;
+  scale: 85%;
   float: left;
 }
 
@@ -132,4 +132,19 @@
 
 .value {
   transform: rotate(-90deg);
+}
+
+@media screen and (max-width: 1240px) {
+  .rouletteTable {
+    margin: 0 auto;
+    scale: 80%;
+    float: none;
+  }
+}
+
+@media screen and (max-width: 680px) {
+  .rouletteTable {
+    scale: 60%;
+    margin-left: -15%;
+  }
 }

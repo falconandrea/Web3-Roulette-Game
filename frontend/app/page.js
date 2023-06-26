@@ -101,6 +101,29 @@ export default function Home() {
   }
 
   const [selected, setSelected] = useState('')
+  const [result, setResult] = useState('')
+  const [bid, setBid] = useState(0.01)
+  const [possibleWin, setPossibleWin] = useState(0)
+
+  const getPossibleWin = () => {
+    if(selected) {
+      if(selected === 0) { setPossibleWin(bid.toFixed(2)) }
+      else if(selected === 'EVEN' || selected === 'ODD') { setPossibleWin((bid * 2).toFixed(2)) }
+      else if(selected === '1st 12' || selected === '2nd 12' || selected === '3rd 12') { setPossibleWin((bid * 3).toFixed(2)) }
+      else if(selected === '1-18' || selected === '2nd 12' || selected === '19-36') { setPossibleWin((bid * 2).toFixed(2)) }
+      else if(selected === 'Black' || selected === 'Red') { setPossibleWin((bid * 2).toFixed(2)) }
+      else { setPossibleWin((bid * 35).toFixed(2)) }
+    }
+  }
+
+  useEffect(() => getPossibleWin(), [selected])
+
+  const redValues = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]
+  const blackValues = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]
+  const evenValues = [2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36]
+  const oddValues = [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]
+
+  const confirmBid = () => {}
 
   return (
     <div>
@@ -117,7 +140,7 @@ export default function Home() {
         ) : ''}
         <div className={styles.containerTableBet}>
           <Table selected={selected} setSelected={setSelected} />
-          <Wheel selected={selected} setSelected={setSelected} />
+          <Wheel selected={selected} setSelected={setSelected} bid={bid} possibleWin={possibleWin} confirmBid={confirmBid} />
         </div>
         {renderMessages()}
       </div>

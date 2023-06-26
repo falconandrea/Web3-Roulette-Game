@@ -1,11 +1,6 @@
 import { useEffect } from 'react'
 import styles from './table.module.css'
 
-const redValues = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]
-const blackValues = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]
-const evenValues = [2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36]
-const oddValues = [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]
-
 export default function Table({selected, setSelected}) {
   useEffect(() => {
     listenerButtons()

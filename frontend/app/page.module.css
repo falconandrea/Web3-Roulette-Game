@@ -1,10 +1,7 @@
-.main {
-  text-align: center;
-}
-
 .containerTableBet {
   overflow: hidden;
   margin: 0 auto;
+  width: 80rem;
 }
 
 .errorMessage {
@@ -35,9 +32,16 @@
 .footer {
   color: white;
   text-align: center;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
+  margin-top: 4rem;
 }
 .footer a {
   color: white;
   text-decoration: underline;
+}
+
+@media screen and (max-width: 1240px) {
+  .containerTableBet {
+    width: 100%;
+  }
 }
