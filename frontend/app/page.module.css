@@ -5,7 +5,12 @@
 }
 
 .errorMessage {
-  color: red;
+  background: red;
+  color: white;
+  padding: 0.5rem 0.8rem;
+  display: block;
+  text-align: center;
+  font-size: 1.8rem;
   margin: 20px 0 20px 0;
 }
 
