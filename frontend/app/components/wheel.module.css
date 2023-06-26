@@ -33,13 +33,13 @@
   -ms-transform: translate(-50%, -50%);
   -o-transform: translate(-50%, -50%);
 }
-.wheelResult.black {
+.wheelResultBlack {
   background-color: black;
 }
-.wheelResult.zero {
+.wheelResultZero {
   background: green;
 }
-.wheelResult.red {
+.wheelResultRed {
   background-color: red;
 }
 

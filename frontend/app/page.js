@@ -1,6 +1,6 @@
 "use client";
 
-import { Contract, providers, utils } from "ethers";
+import { BigNumber, Contract, ethers, providers, utils } from "ethers";
 import Head from "next/head";
 import React, { useEffect, useRef, useState } from "react";
 import Web3Modal from "web3modal";
@@ -8,6 +8,8 @@ import styles from './page.module.css'
 
 import Table from './components/table'
 import Wheel from './components/wheel'
+
+import { createBetObject, wonOrLost } from './utils'
 
 const ROULETTE_ADDRESS = process.env.NEXT_PUBLIC_ROULETTE_ADDRESS
 import contract from "artifactsContracts/Roulette.sol/Roulette"
@@ -25,6 +27,18 @@ export default function Home() {
   // for messages
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  // contract balance
+  const [contractBalance, setContractBalance] = useState('')
+  // user choice
+  const [selected, setSelected] = useState('')
+  // object with info to use on the contract
+  const [bet, setBet] = useState({})
+  // winning number
+  const [result, setResult] = useState('')
+  // bid
+  const [bid, setBid] = useState(0.01)
+  // possible win
+  const [possibleWin, setPossibleWin] = useState(0)
 
   /*
     connectWallet: Connects the MetaMask wallet
@@ -35,6 +49,7 @@ export default function Home() {
       // When used for the first time, it prompts the user to connect their wallet
       await getProviderOrSigner();
       setWalletConnected(true);
+      getContractBalance()
     } catch (err) {
       console.error(err);
     }
@@ -83,6 +98,35 @@ export default function Home() {
     }
   }, [walletConnected]);
 
+  /**
+   * Function to get the contract balance
+   */
+  const getContractBalance = async () => {
+    try {
+      const provider = await getProviderOrSigner()
+      const balance = await provider.getBalance(ROULETTE_ADDRESS)
+      setContractBalance(utils.formatEther(balance))
+    }
+    catch(err) {
+      console.log(err)
+    }
+  }
+
+  // Updates the possible win every time the user changes his choice
+  useEffect(() => {
+    const betObject = createBetObject(selected)
+    setBet(betObject)
+    if(selected) {
+      setSuccessMessage('')
+      setErrorMessage('')
+    }
+    if(betObject && betObject.moltiplicator) setPossibleWin((bid * betObject.moltiplicator).toFixed(2))
+  }, [selected])
+
+  /**
+   * Function to print success/error messages
+   * @returns success/error messages
+   */
   const renderMessages = () => {
     if(successMessage) {
       return (
@@ -100,30 +144,48 @@ export default function Home() {
     }
   }
 
-  const [selected, setSelected] = useState('')
-  const [result, setResult] = useState('')
-  const [bid, setBid] = useState(0.01)
-  const [possibleWin, setPossibleWin] = useState(0)
+  /**
+   * Function called when a user confirms the bet
+   * This calls the contract function based on the choice made by the user
+   * Listening to the event on the contract it retrieves the winning number and checks if the user has won or not
+   */
+  const confirmBid = async () => {
+    try{
+      setErrorMessage('')
+      setSuccessMessage('')
+      setLoading(true)
 
-  const getPossibleWin = () => {
-    if(selected) {
-      if(selected === 0) { setPossibleWin(bid.toFixed(2)) }
-      else if(selected === 'EVEN' || selected === 'ODD') { setPossibleWin((bid * 2).toFixed(2)) }
-      else if(selected === '1st 12' || selected === '2nd 12' || selected === '3rd 12') { setPossibleWin((bid * 3).toFixed(2)) }
-      else if(selected === '1-18' || selected === '2nd 12' || selected === '19-36') { setPossibleWin((bid * 2).toFixed(2)) }
-      else if(selected === 'Black' || selected === 'Red') { setPossibleWin((bid * 2).toFixed(2)) }
-      else { setPossibleWin((bid * 35).toFixed(2)) }
+      const signer = await getProviderOrSigner(true)
+      const rouletteContract = new Contract(
+        ROULETTE_ADDRESS,
+        abi,
+        signer
+      )
+      const tx = await rouletteContract[bet.type](bet.value, {
+        value: utils.parseEther(bid.toString()),
+      })
+
+      rouletteContract
+      .on("SpinComplete", (requestId, spinNumber, qrngResult) => {
+        const resultNumber = ethers.BigNumber.from(qrngResult.mod(37)).toNumber()
+        setResult(resultNumber)
+        setLoading(false)
+        if(wonOrLost(bet, resultNumber)) {
+          setSuccessMessage(`The winnig number is ${resultNumber}! You won!!`)
+        } else {
+          setErrorMessage(`The winnig number is ${resultNumber}! You lost!!`)
+        }
+        setSelected('')
+        getContractBalance()
+      })
+    }
+    catch(err) {
+      console.error(err)
+      setErrorMessage("Error during confirm bid")
+      setLoading(false)
+      setSelected('')
     }
   }
-
-  useEffect(() => getPossibleWin(), [selected])
-
-  const redValues = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]
-  const blackValues = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]
-  const evenValues = [2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36]
-  const oddValues = [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]
-
-  const confirmBid = () => {}
 
   return (
     <div>
@@ -133,6 +195,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className={styles.main}>
+        {renderMessages()}
         { loading ? (
           <div className={styles.loading}>
             <p>Loading...</p>
@@ -140,9 +203,8 @@ export default function Home() {
         ) : ''}
         <div className={styles.containerTableBet}>
           <Table selected={selected} setSelected={setSelected} />
-          <Wheel selected={selected} setSelected={setSelected} bid={bid} possibleWin={possibleWin} confirmBid={confirmBid} />
+          <Wheel selected={selected} setSelected={setSelected} result={result} bid={bid} possibleWin={possibleWin} confirmBid={confirmBid} contractBalance={contractBalance} />
         </div>
-        {renderMessages()}
       </div>
 
       <footer className={styles.footer}>Created by <a href="https://linktr.ee/falconandrea" target="_blank" title="">Falcon Andrea</a></footer>
