@@ -28,6 +28,14 @@ The winning condition is met if the QRNG-generated number lands on a user's sele
 
 Check out our comprehensive guide - [Tutorial](https://docs.api3.org/guides/qrng/roulette-guide/)
 
+### My improvements
+
+- Removed duplicate code in the contract file and moved it inside functions and modifier
+
+- Created a different frontend with NextJS
+
+- Took the contract balance and block bet function if the contract hasn't enough MATIC
+
 ## Instructions
 
 The code works on Mumbai network. If you want to change network, update the file `hardhat.config.js` and `.env` file.
@@ -51,5 +59,11 @@ npx hardhat run scripts/setup.js
 
 # Get the sponsor wallet address and send some MATIC on the contract
 # You can send MATIC to the contract directly or with the topUpSponsorWallet function inside the contract deployed
+
+# Into frontend folder, duplicate .env.example in .env file, insert roulette contract address, network name and id
+cp .env.example .env
+
+# Launch site in local
+npm run dev
 
 ```
