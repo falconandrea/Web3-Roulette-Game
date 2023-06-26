@@ -342,8 +342,8 @@ contract Roulette is RrpRequesterV0 {
       checkIfColorWon(_spin);
     } else if (spinToBetType[_spin] == BetType.EvenOdd) {
       checkIfEvenOddWon(_spin);
-	 } else if (spinToBetType[_spin] == BetType.Half) {
-		checkIfHalfWon(_spin);
+	  } else if (spinToBetType[_spin] == BetType.Half) {
+		  checkIfHalfWon(_spin);
     } else if (spinToBetType[_spin] == BetType.Third) {
       checkIfThirdWon(_spin);
     }
