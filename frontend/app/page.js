@@ -12,7 +12,7 @@ import Wheel from './components/wheel'
 import { createBetObject, wonOrLost } from './utils'
 
 const ROULETTE_ADDRESS = process.env.NEXT_PUBLIC_ROULETTE_ADDRESS
-import contract from "artifactsContracts/Roulette.sol/Roulette"
+import contract from "./contract/Roulette.json"
 const abi = contract.abi
 const NETWORK_NAME = process.env.NEXT_PUBLIC_NETWORK_NAME
 const NETWORK_ID = process.env.NEXT_PUBLIC_NETWORK_ID
