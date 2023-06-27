@@ -2,6 +2,8 @@
 
 LearnWeb3 Bounty: QRNG Roulette Wheel Bounty Challenge
 
+![Image](https://i.imgur.com/FRowwkZ.png)
+
 ## API3 Quantum Roulette Bounty Challenge
 
 ### The Challenge:
@@ -28,13 +30,17 @@ The winning condition is met if the QRNG-generated number lands on a user's sele
 
 Check out our comprehensive guide - [Tutorial](https://docs.api3.org/guides/qrng/roulette-guide/)
 
-### My improvements
+## My improvements
 
-- Removed duplicate code in the contract file and moved it inside functions and modifier
+- Created in the contract a modifier called "checkBetConditions" with some checks repeating several times.
 
-- Created a different frontend with NextJS
+- Created the "sendUnsuccessfullBet", "sendSuccessfullBet" and "returnBet" functions in the contract to isolate bid submissions in case of success and loss.
 
-- Took the contract balance and block bet function if the contract hasn't enough MATIC
+- Created a frontend with NextJS with custom graphics.
+
+- Made visible on the frontend the possible winnings based on the choice made by the user.
+
+- Made visible on the frontend the contract balance, so as to also block the possibility of placing a bet if the possible winnings are greater than the contract balance.
 
 ## Instructions
 
