@@ -7,31 +7,44 @@ const oddValues = [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]
  * Function that determines if the user has won
  */
 const wonOrLost = (userChoice, resultNumber) => {
-  if(userChoice.type === 'betNumber') {
-    if(userChoice.value === resultNumber) return true
-    else return false
+  const { type, value } = userChoice;
+  switch (type) {
+    case 'betNumber':
+      return value === resultNumber;
+    case 'betEvenOdd':
+      if (value === 1) {
+        return evenValues.includes(resultNumber);
+      } else if (value === 0) {
+        return oddValues.includes(resultNumber);
+      }
+      break;
+    case 'betOneThird':
+      if (value === 1) {
+        return resultNumber <= 12;
+      } else if (value === 2) {
+        return resultNumber >= 13 && resultNumber <= 24;
+      } else if (value === 3) {
+        return resultNumber >= 25;
+      }
+      break;
+    case 'betHalf':
+      if (value === 1) {
+        return resultNumber <= 18;
+      } else if (value === 2) {
+        return resultNumber >= 19;
+      }
+      break;
+    case 'betColor':
+      if (value === 1) {
+        return blackValues.includes(resultNumber);
+      } else if (value === 0) {
+        return redValues.includes(resultNumber);
+      }
+      break;
+    default:
+      return false;
   }
-  else if(userChoice.type === 'betEvenOdd') {
-    if(userChoice.value === 'EVEN' && evenValues.includes(resultNumber)) return true
-    else if(userChoice.value === 'ODD' && oddValues.includes(resultNumber)) return true
-    else return false
-  }
-  else if(userChoice.type === 'betOneThird') {
-    if(userChoice.value === '1st 12' && resultNumber <= 12) return true
-    else if(userChoice.value === '2nd 12' && (resultNumber >= 13 || resultNumber <= 24)) return true
-    else if(userChoice.value === '3rd 12' && resultNumber >= 25) return true
-    else return false
-  }
-  else if(userChoice.type === 'betHalf') {
-    if(userChoice.value === '1-18' && resultNumber <= 18) return true
-    else if(userChoice.value === '19-36' && resultNumber >= 19) return true
-    else return false
-  }
-  else if(userChoice.type === 'betColor') {
-    if(userChoice.value === 'Black' && blackValues.includes(resultNumber)) return true
-    else if(userChoice.value === 'Red' && redValues.includes(resultNumber)) return true
-    else return false
-  }
+  return false;
 }
 
 /**
