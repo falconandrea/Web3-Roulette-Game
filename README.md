@@ -1,3 +1,7 @@
+<a href="https://trackgit.com">
+<img src="https://us-central1-trackgit-analytics.cloudfunctions.net/token/ping/ljptrznd1k9n5kykoful" alt="trackgit-views" />
+</a>
+
 # Roulette game on-chain
 
 LearnWeb3 Bounty: QRNG Roulette Wheel Bounty Challenge
