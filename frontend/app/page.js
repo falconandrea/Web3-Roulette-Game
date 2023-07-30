@@ -15,7 +15,9 @@ const ROULETTE_ADDRESS = process.env.NEXT_PUBLIC_ROULETTE_ADDRESS
 import contract from "./contract/Roulette.json"
 const abi = contract.abi
 const NETWORK_NAME = process.env.NEXT_PUBLIC_NETWORK_NAME
+console.log(`NETWORK_NAME`, NETWORK_NAME)
 const NETWORK_ID = process.env.NEXT_PUBLIC_NETWORK_ID
+console.log(`NETWORK_ID`, NETWORK_ID)
 
 export default function Home() {
   // walletConnected keep track of whether the user's wallet is connected or not
