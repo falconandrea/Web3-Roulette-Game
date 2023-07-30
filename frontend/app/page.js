@@ -171,10 +171,13 @@ export default function Home() {
       .on("SpinComplete", (requestId, spinNumber, qrngResult) => {
         const resultNumber = ethers.BigNumber.from(qrngResult.mod(37)).toNumber()
         setResult(resultNumber)
+        console.log('result number', resultNumber)
         setLoading(false)
         if(wonOrLost(bet, resultNumber)) {
+          console.log('You win')
           setSuccessMessage(`The winnig number is ${resultNumber}! You won!!`)
         } else {
+          console.log('You lost')
           setErrorMessage(`The winnig number is ${resultNumber}! You lost!!`)
         }
         setSelected('')
