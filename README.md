@@ -6,6 +6,12 @@
 
 LearnWeb3 Bounty: QRNG Roulette Wheel Bounty Challenge
 
+## I created this project to participate to a bounty on LearnWeb3DAO.
+
+[Here](https://docs.google.com/document/d/12WFsgTIIVo9LpMRl5Q-2SLszOFVwbe5rViLqIjuTvRY/edit?usp=sharing) you can find the info about the bounty. 🥇🥇 ***I won with this project.*** 🥇🥇
+
+-----
+
 ![Image](https://i.imgur.com/FRowwkZ.png)
 
 ## API3 Quantum Roulette Bounty Challenge
